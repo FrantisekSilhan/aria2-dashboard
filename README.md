@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# aria2c Dashboard
 
-## Getting Started
+Web dashboard for [aria2c](https://aria2.github.io/), built with Next.js, React, and Tailwind CSS.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+- **Multiple RPC endpoints**: Add, remove, and switch between them
+- **Add downloads**: Specify URL and output directory
+- **Control downloads**: Pause, resume, remove
+- **Set global download speed**
+- **Live stats**: Download/upload speed, active/waiting/stopped counts
+- **Modern UI**: Responsive, clean, and fast
+
+---
+
+## 🖥️ Dashboard Setup
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/frantiseksilhan/aria2-dashboard.git
+cd aria2-dashboard
+```
+
+2. **Install dependencies:**
+
+```bash
+npm install
+```
+
+3. **Run the project:**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. **Open your browser:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Visit http://localhost:3000/dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## ⚙️ aria2c Configuration
 
-To learn more about Next.js, take a look at the following resources:
+1. **Create aria2c config file**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Edit `/home/USER/.aria2/aria2.conf` (replace USER with your username):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```ini
+enable-rpc=true
+rpc-listen-all=true
+dir=/home/USER/aria2
+continue=true
+rpc-allow-origin-all=true
+```
 
-## Deploy on Vercel
+- enable-rpc=true: Enables the JSON-RPC interface
+- rpc-listen-all=true: Listens on all network interfaces (for remote access)
+- dir=/home/USER/aria2: Default download directory
+- continue=true: Resume partially downloaded files
+- rpc-allow-origin-all=true: Allow all origins (for dashboard access)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Replace `USER` with your actual username.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> Tip: Create the download directory if it doesn't exist:
+> ```bash
+> mkdir -p /home/USER/aria2
+> ```
+
+2. **Create a systemd service**
+
+Create `/etc/systemd/system/aria2c.service`:
+
+```ini
+[Unit]
+Description=Aria2c download manager
+After=network.target
+
+[Service]
+User=USER
+ExecStart=/usr/bin/aria2c --conf-path=/home/USER/.aria2/aria2.conf
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Replace `USER` with your actual username.
+
+3. **Enable and start the service**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable aria2c
+sudo systemctl start aria2c
+```
+
+Check status with:
+
+```bash
+sudo systemctl status aria2c
+```
+
+---
+
+## 🔒 Security Notes
+
+- For public or remote access, consider securing your aria2c RPC interface with a secret token or firewall rules.
+- See the [aria2c documentation](https://aria2.github.io/manual/en/html/aria2c.html) for more info.
+
+---
+
+## 📝 License
+
+**MIT**
